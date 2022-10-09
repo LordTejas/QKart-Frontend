@@ -10,6 +10,10 @@ import "./Register.css";
 
 const Register = () => {
   const { enqueueSnackbar } = useSnackbar();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isGettingRegistered, setGettingRegistered] = useState(false);
 
 
   // TODO: CRIO_TASK_MODULE_REGISTER - Implement the register function
@@ -35,7 +39,45 @@ const Register = () => {
    *      "message": "Username is already taken"
    * }
    */
+
+  const handleRegister = (e) => {
+    const formData = {
+      username,
+      password,
+      confirmPassword
+    }
+
+    if (validateInput(formData)) {
+      register(formData);
+    }
+
+  }
+
   const register = async (formData) => {
+    console.log(formData);
+
+    const endpointUrl = `${config.endpoint}/auth/register`;
+
+    try {
+      setGettingRegistered(true);
+      const response = await axios.post(
+        endpointUrl,
+        formData
+      )
+
+      if (response.status === 201) {
+        enqueueSnackbar('Registered Successfully', {variant: 'success'});
+        return;
+      }
+
+    } catch (e) {
+      console.log(e.response);
+      enqueueSnackbar("No Success: Username is Already Taken", {variant: 'error'});
+    } finally {
+      setGettingRegistered(false);
+    }
+
+
   };
 
   // TODO: CRIO_TASK_MODULE_REGISTER - Implement user input validation logic
@@ -56,7 +98,30 @@ const Register = () => {
    * -    Check that password field is not less than 6 characters in length - "Password must be at least 6 characters"
    * -    Check that confirmPassword field has the same value as password field - Passwords do not match
    */
-  const validateInput = (data) => {
+   const validateInput = (data) => {
+    const {username, password, confirmPassword} = data;
+
+    if (!username) {
+      enqueueSnackbar("Username is a required field", {variant: "warning"});
+      return false;
+    }
+    if (username.length < 6) {
+      enqueueSnackbar("Username must be at least 6 characters", {variant: "warning"});
+      return false;
+    }
+    if (!password) {enqueueSnackbar("Password is a required field", {variant: "warning"});
+      return false;
+    }
+    if (password.length < 6) {
+      enqueueSnackbar("Password must be at least 6 characters", {variant: "warning"});
+      return false;
+    }
+    if (password !== confirmPassword) {
+      enqueueSnackbar("Passwords do not match", {variant: "warning"});
+      return false;
+    }
+
+    return true;
   };
 
   return (
@@ -72,6 +137,8 @@ const Register = () => {
           <h2 className="title">Register</h2>
           <TextField
             id="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             label="Username"
             variant="outlined"
             title="Username"
@@ -81,6 +148,8 @@ const Register = () => {
           />
           <TextField
             id="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             variant="outlined"
             label="Password"
             name="password"
@@ -91,15 +160,31 @@ const Register = () => {
           />
           <TextField
             id="confirmPassword"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
             variant="outlined"
             label="Confirm Password"
             name="confirmPassword"
             type="password"
             fullWidth
           />
-           <Button className="button" variant="contained">
+          
+          {
+
+            (isGettingRegistered) ?
+
+            <CircularProgress color="success" style={{'align-self': 'center'}} />
+
+            :
+
+
+            <Button className="button" variant="contained" onClick={handleRegister}>
             Register Now
            </Button>
+          }
+
+          
+           
           <p className="secondary-action">
             Already have an account?{" "}
              <a className="link" href="#">
