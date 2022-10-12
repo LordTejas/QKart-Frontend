@@ -2,7 +2,8 @@ import { Button, CircularProgress, Stack, TextField } from "@mui/material";
 import { Box } from "@mui/system";
 import axios from "axios";
 import { useSnackbar } from "notistack";
-import React, { useState } from "react";
+import React, { useState} from "react";
+import { useHistory, Link } from "react-router-dom";
 import { config } from "../App";
 import Footer from "./Footer";
 import Header from "./Header";
@@ -14,7 +15,7 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isGettingRegistered, setGettingRegistered] = useState(false);
-
+  const history = useHistory();
 
   // TODO: CRIO_TASK_MODULE_REGISTER - Implement the register function
   /**
@@ -45,7 +46,7 @@ const Register = () => {
       username,
       password,
       confirmPassword
-    }
+    };
 
     if (validateInput(formData)) {
       register(formData);
@@ -54,7 +55,7 @@ const Register = () => {
   }
 
   const register = async (formData) => {
-    console.log(formData);
+    // console.log(formData);
 
     const endpointUrl = `${config.endpoint}/auth/register`;
 
@@ -62,17 +63,21 @@ const Register = () => {
       setGettingRegistered(true);
       const response = await axios.post(
         endpointUrl,
-        formData
+        {
+          'username': formData.username,
+          'password': formData.password
+        }
       )
 
       if (response.status === 201) {
+        history.push("/login");
         enqueueSnackbar('Registered Successfully', {variant: 'success'});
         return;
       }
 
     } catch (e) {
-      console.log(e.response);
-      enqueueSnackbar("No Success: Username is Already Taken", {variant: 'error'});
+      // console.log(e.response);
+      enqueueSnackbar(e.response.data.message, {variant: 'error'});
     } finally {
       setGettingRegistered(false);
     }
@@ -105,17 +110,21 @@ const Register = () => {
       enqueueSnackbar("Username is a required field", {variant: "warning"});
       return false;
     }
+
     if (username.length < 6) {
       enqueueSnackbar("Username must be at least 6 characters", {variant: "warning"});
       return false;
     }
+
     if (!password) {enqueueSnackbar("Password is a required field", {variant: "warning"});
       return false;
     }
+
     if (password.length < 6) {
       enqueueSnackbar("Password must be at least 6 characters", {variant: "warning"});
       return false;
     }
+
     if (password !== confirmPassword) {
       enqueueSnackbar("Passwords do not match", {variant: "warning"});
       return false;
@@ -134,7 +143,9 @@ const Register = () => {
       <Header hasHiddenAuthButtons />
       <Box className="content">
         <Stack spacing={2} className="form">
+
           <h2 className="title">Register</h2>
+
           <TextField
             id="username"
             value={username}
@@ -146,6 +157,7 @@ const Register = () => {
             placeholder="Enter Username"
             fullWidth
           />
+
           <TextField
             id="password"
             value={password}
@@ -158,6 +170,7 @@ const Register = () => {
             fullWidth
             placeholder="Enter a password with minimum 6 characters"
           />
+
           <TextField
             id="confirmPassword"
             value={confirmPassword}
@@ -173,23 +186,20 @@ const Register = () => {
 
             (isGettingRegistered) ?
 
-            <CircularProgress color="success" style={{'align-self': 'center'}} />
+            <CircularProgress color="success" style={{alignSelf: "center"}} />
 
             :
-
 
             <Button className="button" variant="contained" onClick={handleRegister}>
             Register Now
            </Button>
-          }
-
+          }          
           
-           
           <p className="secondary-action">
             Already have an account?{" "}
-             <a className="link" href="#">
+             <Link className="link" to="login">
               Login here
-             </a>
+             </Link>
           </p>
         </Stack>
       </Box>
