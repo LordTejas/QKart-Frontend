@@ -10,6 +10,7 @@ import axios from "axios";
 import { useSnackbar } from "notistack";
 import React, { useEffect, useState } from "react";
 import { config } from "../App";
+import ProductCard from "./ProductCard";
 import Footer from "./Footer";
 import Header from "./Header";
 import "./Products.css";
@@ -28,6 +29,21 @@ import "./Products.css";
 
 
 const Products = () => {
+
+  const [products, setProducts] = useState([]);
+
+  // Load Products
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const data = await performAPICall();
+      setProducts(data);
+    };
+
+    fetchProducts();
+  }, []);
+
+
+
 
   // TODO: CRIO_TASK_MODULE_PRODUCTS - Fetch products data and store it
   /**
@@ -66,8 +82,35 @@ const Products = () => {
    *      "message": "Something went wrong. Check the backend console for more details"
    * }
    */
+
+
   const performAPICall = async () => {
+    const productsUrl = `${config.endpoint}/products`;
+
+    try {
+      let productsResponse = await axios.get(productsUrl);
+
+      if (productsResponse.status === 200) {
+        // console.log(productsResponse.data);
+        return productsResponse.data;
+      }
+
+    } catch (e) {
+      console.log(e);
+      return [];
+    }
+
   };
+
+  const productItem = (product) => {
+    return (
+      <Grid item xs={6} md={3} key={product._id}>
+        <ProductCard product={product} />
+      </Grid>
+    );
+  };
+
+
 
   // TODO: CRIO_TASK_MODULE_PRODUCTS - Implement search logic
   /**
@@ -101,9 +144,7 @@ const Products = () => {
   const debounceSearch = (event, debounceTimeout) => {
   };
 
-
-
-
+  
 
 
 
@@ -129,7 +170,8 @@ const Products = () => {
         placeholder="Search for items/categories"
         name="search"
       />
-       <Grid container>
+
+       <Grid container spacing={2}>
          <Grid item className="product-grid">
            <Box className="hero">
              <p className="hero-heading">
@@ -139,6 +181,13 @@ const Products = () => {
            </Box>
          </Grid>
        </Grid>
+
+        <Box>
+          <Grid container spacing={{ xs: 2, md: 3 }}>
+            {products.map(productItem)}
+          </Grid>
+        </Box>
+
       <Footer />
     </div>
   );
