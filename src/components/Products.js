@@ -4,6 +4,7 @@ import {
   Grid,
   InputAdornment,
   TextField,
+  Typography
 } from "@mui/material";
 import { Box } from "@mui/system";
 import axios from "axios";
@@ -29,19 +30,28 @@ import "./Products.css";
 
 
 const Products = () => {
-
   const [products, setProducts] = useState([]);
+  const [isLoading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
+  const [debounceTimeout, setDebounceTimeout] = useState(0);
 
   // Load Products
   useEffect(() => {
     const fetchProducts = async () => {
       const data = await performAPICall();
       setProducts(data);
+      setLoading(false);
     };
 
+    setLoading(true);
     fetchProducts();
   }, []);
 
+
+  // Search Update Effect
+  // useEffect(() => {
+  //   performSearch(search);
+  // }, [search]);
 
 
 
@@ -102,14 +112,50 @@ const Products = () => {
 
   };
 
-  const productItem = (product) => {
-    return (
+  const ProductItem = (product) => (
       <Grid item xs={6} md={3} key={product._id}>
         <ProductCard product={product} />
       </Grid>
     );
-  };
 
+  const ProductsList = () => (
+    <Grid container spacing={{ xs: 2, md: 3 }}>
+      {products.map(ProductItem)}
+    </Grid>
+    );
+
+  const NotFound = () => (
+    <Box className="loading">
+      <SentimentDissatisfied fontSize="large" />
+      <Typography variant="body2" fontSize="large" >No products found</Typography>
+    </Box>
+  );
+
+  const ShowLoading = () => (
+    <Box className="loading">
+      <CircularProgress color="success" />
+      <Typography variant="body2" fontSize="large">Loading Products ...</Typography>
+    </Box>
+  );
+
+  const SearchBox = () => (
+    <Box>
+      <TextField
+        className="search search-desktop"
+        size="small"
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <Search color="primary" />
+            </InputAdornment>
+          ),
+        }}
+        placeholder="Search for items/categories"
+        name="search"
+        onChange={(e)=> debounceSearch(e, debounceTimeout)}
+      />
+    </Box>
+  );
 
 
   // TODO: CRIO_TASK_MODULE_PRODUCTS - Implement search logic
@@ -127,6 +173,36 @@ const Products = () => {
    *
    */
   const performSearch = async (text) => {
+    // console.log(text);
+
+    setLoading(true);
+    setNotFound(false);
+
+    try {
+      const response = await axios.get(
+        `${config.endpoint}/products/search?value=${text}`
+      );
+      if (response.status === 200) {
+        setProducts(response.data);
+      }
+
+    } catch (e) {
+      if (e.response) {
+        if (e.response.status === 404) {
+          // enqueueSnackbar(e.response.data.message, {variant : "error"})
+          setProducts([]);
+          setNotFound(true);
+        }
+        if (e.response.status === 500) {
+          
+          setProducts(products);
+        }
+      } else {
+
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   // TODO: CRIO_TASK_MODULE_PRODUCTS - Optimise API calls with debounce search implementation
@@ -142,26 +218,32 @@ const Products = () => {
    *
    */
   const debounceSearch = (event, debounceTimeout) => {
+    const value = event.target.value;
+    console.log(debounceTimeout);
+    if (debounceTimeout) {
+      clearTimeout(debounceTimeout);
+    }
+    const timeOut = setTimeout(async () => {
+      await performSearch(value);
+    }, 500);
+    setDebounceTimeout(timeOut);
   };
-
-  
-
 
 
   return (
     <div>
-      <Header>
+      <Header children={SearchBox()}>
         {/* TODO: CRIO_TASK_MODULE_PRODUCTS - Display search bar in the header for Products page */}
 
       </Header>
 
       {/* Search view for mobiles */}
-      <TextField
+     <TextField
         className="search-mobile"
         size="small"
         fullWidth
         InputProps={{
-          endAdornment: (
+           endAdornment: (
             <InputAdornment position="end">
               <Search color="primary" />
             </InputAdornment>
@@ -169,6 +251,7 @@ const Products = () => {
         }}
         placeholder="Search for items/categories"
         name="search"
+        onChange={(e)=> debounceSearch(e, debounceTimeout)}
       />
 
        <Grid container spacing={2}>
@@ -182,10 +265,8 @@ const Products = () => {
          </Grid>
        </Grid>
 
-        <Box>
-          <Grid container spacing={{ xs: 2, md: 3 }}>
-            {products.map(productItem)}
-          </Grid>
+        <Box m={2}>
+          {isLoading ? <ShowLoading /> : notFound ? <NotFound /> : <ProductsList />}          
         </Box>
 
       <Footer />

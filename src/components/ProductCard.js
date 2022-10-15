@@ -25,11 +25,13 @@ const ProductCard = ({ product, handleAddToCart }) => {
         <CardContent>
           <Typography gutterBottom variant="h5">{product.name}</Typography>
           <Typography gutterBottom variant="h5"><b>{"$" + product.cost}</b></Typography>
-          <Rating value={product.rating}></Rating>
+          <Rating value={product.rating} readOnly></Rating>
         </CardContent>
       </CardActionArea>
       <CardActions className="card-actions">
-        <Button variant="contained" component="div" fullWidth className="card-button">ADD TO CART</Button>
+        <Button variant="contained" component="div" style={{width: '100%'}} className="card-button">
+          <AddShoppingCartOutlined />
+          ADD TO CART</Button>
       </CardActions>
 
     </Card>

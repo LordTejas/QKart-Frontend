@@ -56,14 +56,9 @@ const Header = ({ children, hasHiddenAuthButtons }) => {
         <Box className="header-title">
             <img src="logo_light.svg" alt="QKart-icon"></img>
         </Box>
-        {/* <Button
-          className="explore-button"
-          startIcon={<ArrowBackIcon />}
-          variant="text"
-          onClick={() => {history.push("/")}}
-        >
-          Back to explore
-        </Button> */}
+        
+        {children}
+
         <Stack direction="row" alignItems="center" spacing={1}>
         {(hasHiddenAuthButtons) ? exploreButton: (isLoggedIn) ? userDashBoard : actionBoard}
         </Stack>
