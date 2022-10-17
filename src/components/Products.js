@@ -12,6 +12,7 @@ import { useSnackbar } from "notistack";
 import React, { useEffect, useState } from "react";
 import { config } from "../App";
 import ProductCard from "./ProductCard";
+import Cart from "./Cart";
 import Footer from "./Footer";
 import Header from "./Header";
 import "./Products.css";
@@ -32,11 +33,18 @@ import "./Products.css";
 
 
 const Products = () => {
-  const {enqueueSnackbar} = useSnackbar();
+  const { enqueueSnackbar } = useSnackbar();
   const [products, setProducts] = useState([]);
   const [isLoading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [debounceTimeout, setDebounceTimeout] = useState(0);
+
+  // Login Check
+  const isLoginDataPresent = () => {
+    return Boolean(localStorage.getItem("username"));
+  }
+
+  const [isLoggedIn, setIsLoggedIn] = useState(isLoginDataPresent());
 
   // Load Products
   useEffect(() => {
@@ -228,7 +236,7 @@ const Products = () => {
     }
     const timeOut = setTimeout(async () => {
       await performSearch(value);
-    }, 500);
+    }, 500);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
     setDebounceTimeout(timeOut);
   };
 
@@ -266,6 +274,8 @@ const Products = () => {
 
     try {
       // TODO: CRIO_TASK_MODULE_CART - Pass Bearer token inside "Authorization" header to get data from "GET /cart" API and return the response data
+      
+    
     } catch (e) {
       if (e.response && e.response.status === 400) {
         enqueueSnackbar(e.response.data.message, { variant: "error" });
@@ -344,6 +354,12 @@ const Products = () => {
   ) => {
   };
 
+  const ShowCart = () => (
+    <Grid item xs={12} md={3} style={{backgroundColor: '#E9F5E1'}}>
+      <Cart />
+    </Grid>
+  );
+
 
   return (
     <div>
@@ -369,20 +385,25 @@ const Products = () => {
         onChange={(e)=> debounceSearch(e, debounceTimeout)}
       />
 
-       <Grid container spacing={2}>
-         <Grid item className="product-grid">
+       <Grid container>
+         <Grid item className="product-grid" xs={12} md={ isLoggedIn ? 9 : 12}>
            <Box className="hero">
              <p className="hero-heading">
                India’s <span className="hero-highlight">FASTEST DELIVERY</span>{" "}
                to your door step
              </p>
            </Box>
+
+           <Box m={2}>
+            {isLoading ? <ShowLoading /> : notFound ? <NotFound /> : <ProductsList />}          
+          </Box>
          </Grid>
+
+         {isLoggedIn && <ShowCart />}
+
        </Grid>
 
-        <Box m={2}>
-          {isLoading ? <ShowLoading /> : notFound ? <NotFound /> : <ProductsList />}          
-        </Box>
+        
 
       <Footer />
     </div>
