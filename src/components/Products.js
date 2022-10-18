@@ -12,7 +12,7 @@ import { useSnackbar } from "notistack";
 import React, { useEffect, useState } from "react";
 import { config } from "../App";
 import ProductCard from "./ProductCard";
-import Cart from "./Cart";
+import Cart, {generateCartItemsFrom} from "./Cart";
 import Footer from "./Footer";
 import Header from "./Header";
 import "./Products.css";
@@ -35,6 +35,7 @@ import "./Products.css";
 const Products = () => {
   const { enqueueSnackbar } = useSnackbar();
   const [products, setProducts] = useState([]);
+  const [cartItems, setCartItems] = useState([]);
   const [isLoading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [debounceTimeout, setDebounceTimeout] = useState(0);
@@ -45,6 +46,10 @@ const Products = () => {
   }
 
   const [isLoggedIn, setIsLoggedIn] = useState(isLoginDataPresent());
+  
+  const getToken = () => {
+    return isLoggedIn ? localStorage.getItem("token") : null;
+  }
 
   // Load Products
   useEffect(() => {
@@ -57,6 +62,19 @@ const Products = () => {
     setLoading(true);
     fetchProducts();
   }, []);
+
+  useEffect(()=>{
+    async function loadCart(){
+      if (getToken()) {
+        const cartData = await fetchCart(getToken());
+        const productData = await performAPICall();
+        const cartItemsData = generateCartItemsFrom(cartData,productData);
+        console.log(cartItemsData);
+        setCartItems(cartItemsData);
+      }
+    }
+    loadCart();
+  },[])
 
 
   // Search Update Effect
@@ -125,7 +143,7 @@ const Products = () => {
 
   const ProductItem = (product) => (
       <Grid item xs={6} md={3} key={product._id}>
-        <ProductCard product={product} />
+        <ProductCard product={product} handleAddToCart={addToCart} />
       </Grid>
     );
 
@@ -274,8 +292,20 @@ const Products = () => {
 
     try {
       // TODO: CRIO_TASK_MODULE_CART - Pass Bearer token inside "Authorization" header to get data from "GET /cart" API and return the response data
+      const CartEndpoint = `${config.endpoint}/cart`;
       
-    
+      let cartEndpointResponse = await axios.get(
+        CartEndpoint,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+
+      // console.log(cartEndpointResponse.data);
+      return cartEndpointResponse.data;
+
     } catch (e) {
       if (e.response && e.response.status === 400) {
         enqueueSnackbar(e.response.data.message, { variant: "error" });
@@ -285,8 +315,9 @@ const Products = () => {
           {
             variant: "error",
           }
-        );
+        )
       }
+
       return null;
     }
   };
@@ -306,6 +337,7 @@ const Products = () => {
    *
    */
   const isItemInCart = (items, productId) => {
+    return Boolean(items.find(item => item._id = productId));
   };
 
   /**
@@ -344,6 +376,7 @@ const Products = () => {
    *      "message": "Product doesn't exist"
    * }
    */
+
   const addToCart = async (
     token,
     items,
@@ -352,13 +385,47 @@ const Products = () => {
     qty,
     options = { preventDuplicate: false }
   ) => {
-  };
 
-  const ShowCart = () => (
-    <Grid item xs={12} md={3} style={{backgroundColor: '#E9F5E1'}}>
-      <Cart />
-    </Grid>
-  );
+    if (!token) {
+      enqueueSnackbar("Login to add an item to the Cart", {variant: "warning"});
+      return;
+    }
+
+    if (isItemInCart(items, productId) && options.preventDuplicate) {
+      enqueueSnackbar(
+        "Item already in cart. Use the cart sidebar to update quantity or remove item.",
+        {variant:"warning"}
+      )
+    }
+
+    const cartEndpoint = `${config.endpoint}/cart`;
+    
+    const itemData = {
+      productId,
+      qty
+    };
+    
+    try {
+      
+      const cartEndpointResponse = await axios.post(
+        cartEndpoint,
+        itemData,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        },
+      );
+        
+      const newCartItems = await cartEndpointResponse.data;
+      setCartItems(newCartItems);
+      
+    } catch (e) {
+      console.log(e.response);
+      enqueueSnackbar("Failed to Update Cart", {variant: 'error'});
+    }
+    
+  };
 
 
   return (
@@ -399,11 +466,13 @@ const Products = () => {
           </Box>
          </Grid>
 
-         {isLoggedIn && <ShowCart />}
+         {isLoggedIn && 
+          <Grid item xs={12} md={3} style={{backgroundColor: '#E9F5E1'}}>
+            <Cart products={products} items={cartItems} handleQuantity={addToCart} />
+          </Grid>
+         }
 
        </Grid>
-
-        
 
       <Footer />
     </div>

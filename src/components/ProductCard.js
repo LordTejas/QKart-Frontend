@@ -29,9 +29,25 @@ const ProductCard = ({ product, handleAddToCart }) => {
         </CardContent>
       </CardActionArea>
       <CardActions className="card-actions">
-        <Button variant="contained" component="div" style={{width: '100%'}} className="card-button">
+        <Button 
+        variant="contained" 
+        component="div" 
+        style={{width: '100%'}} 
+        className="card-button" 
+        onClick={() => {
+          handleAddToCart(
+            localStorage.getItem("token"),
+            [],
+            [],
+            product._id,
+            1,
+            {preventDuplicate:true}
+          )
+        }}
+        >
           <AddShoppingCartOutlined />
-          ADD TO CART</Button>
+          ADD TO CART
+        </Button>
       </CardActions>
 
     </Card>

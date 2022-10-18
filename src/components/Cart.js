@@ -48,6 +48,16 @@ import "./Cart.css";
  *
  */
 export const generateCartItemsFrom = (cartData, productsData) => {
+  if (productsData.length === 0) return [];
+
+  let cartItems = [];
+
+  cartData.forEach(cartItem => {
+    const cartItemData = productsData.find(productData => productData._id === cartItem.productId);
+    cartItems.push({...cartItemData, qty: cartItem.qty});
+  });
+
+  return cartItems;
 };
 
 /**
@@ -61,6 +71,11 @@ export const generateCartItemsFrom = (cartData, productsData) => {
  *
  */
 export const getTotalCartValue = (items = []) => {
+  if (items) {
+    return items.reduce((acc, curr) => acc + (curr.cost * curr.qty), 0);
+  }
+
+  return 0;
 };
 
 
@@ -118,6 +133,11 @@ const Cart = ({
   handleQuantity,
 }) => {
 
+  const history = useHistory();
+  
+  // console.log(products);
+  // console.log(items);
+
   if (!items.length) {
     return (
       <Box className="cart empty">
@@ -129,10 +149,58 @@ const Cart = ({
     );
   }
 
+  items = generateCartItemsFrom(items, products);
+
+  const increaseCartQty = (token, items, products, productId, qty) => {
+    handleQuantity(token, items, products, productId, qty + 1);
+  };
+
+  const decreaseCartQty = (token, items, products, productId, qty) => {
+    handleQuantity(token, items, products, productId, qty - 1);
+  };
+
+  const CartItemView = (cartItem) => (
+  <Box display="flex" alignItems="flex-start" padding="1rem" key={cartItem._id}>
+      <Box className="image-container">
+          <img
+              src={cartItem.image}
+              alt={cartItem.name}
+              width="100%"
+              height="100%"
+          />
+      </Box>
+      <Box
+          display="flex"
+          flexDirection="column"
+          justifyContent="space-between"
+          height="6rem"
+          paddingX="1rem"
+      >
+          <div>{cartItem.name}</div>
+          <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+          >
+          <ItemQuantity
+          value={cartItem.qty}
+          handleAdd={increaseCartQty}
+          handleDelete={decreaseCartQty}
+          />
+          <Box padding="0.5rem" fontWeight="700">
+              ${cartItem.cost}
+          </Box>
+          </Box>
+      </Box>
+  </Box>
+  );
+
+  const CartItemsViewList = (cartItems) => cartItems.map(CartItemView);
+
   return (
     <>
       <Box className="cart">
-        {/* TODO: CRIO_TASK_MODULE_CART - Display view for each cart item with non-zero quantity */}
+        {CartItemsViewList(items)}
         <Box
           padding="1rem"
           display="flex"
