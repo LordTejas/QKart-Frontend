@@ -54,7 +54,7 @@ export const generateCartItemsFrom = (cartData, productsData) => {
 
   cartData.forEach(cartItem => {
     const cartItemData = productsData.find(productData => productData._id === cartItem.productId);
-    cartItems.push({...cartItemData, qty: cartItem.qty});
+    cartItems.push({...cartItemData, ...cartItem});
   });
 
   return cartItems;
@@ -149,18 +149,10 @@ const Cart = ({
     );
   }
 
-  items = generateCartItemsFrom(items, products);
-
-  const increaseCartQty = (token, items, products, productId, qty) => {
-    handleQuantity(token, items, products, productId, qty + 1);
-  };
-
-  const decreaseCartQty = (token, items, products, productId, qty) => {
-    handleQuantity(token, items, products, productId, qty - 1);
-  };
+  // items = generateCartItemsFrom(items, products);
 
   const CartItemView = (cartItem) => (
-  <Box display="flex" alignItems="flex-start" padding="1rem" key={cartItem._id}>
+  <Box display="flex" alignItems="flex-start" padding="1rem" key={cartItem.productId}>
       <Box className="image-container">
           <img
               src={cartItem.image}
@@ -184,8 +176,8 @@ const Cart = ({
           >
           <ItemQuantity
           value={cartItem.qty}
-          handleAdd={increaseCartQty}
-          handleDelete={decreaseCartQty}
+          handleAdd={() => handleQuantity(localStorage.getItem("token"), null, null, cartItem.productId, cartItem.qty + 1)}
+          handleDelete={() => handleQuantity(localStorage.getItem("token"), null, null, cartItem.productId, cartItem.qty - 1)}
           />
           <Box padding="0.5rem" fontWeight="700">
               ${cartItem.cost}
@@ -227,6 +219,7 @@ const Cart = ({
             variant="contained"
             startIcon={<ShoppingCart />}
             className="checkout-btn"
+            onClick={() => history.push("/checkout")}
           >
             Checkout
           </Button>

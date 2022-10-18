@@ -45,7 +45,7 @@ const Products = () => {
     return Boolean(localStorage.getItem("username"));
   }
 
-  const [isLoggedIn, setIsLoggedIn] = useState(isLoginDataPresent());
+  const isLoggedIn = isLoginDataPresent();
   
   const getToken = () => {
     return isLoggedIn ? localStorage.getItem("token") : null;
@@ -69,7 +69,7 @@ const Products = () => {
         const cartData = await fetchCart(getToken());
         const productData = await performAPICall();
         const cartItemsData = generateCartItemsFrom(cartData,productData);
-        console.log(cartItemsData);
+
         setCartItems(cartItemsData);
       }
     }
@@ -248,7 +248,7 @@ const Products = () => {
    */
   const debounceSearch = (event, debounceTimeout) => {
     const value = event.target.value;
-    console.log(debounceTimeout);
+    // console.log(debounceTimeout);
     if (debounceTimeout) {
       clearTimeout(debounceTimeout);
     }
@@ -337,7 +337,7 @@ const Products = () => {
    *
    */
   const isItemInCart = (items, productId) => {
-    return Boolean(items.find(item => item._id = productId));
+    return Boolean(items.find(item => item.productId === productId));
   };
 
   /**
@@ -391,11 +391,9 @@ const Products = () => {
       return;
     }
 
-    if (isItemInCart(items, productId) && options.preventDuplicate) {
-      enqueueSnackbar(
-        "Item already in cart. Use the cart sidebar to update quantity or remove item.",
-        {variant:"warning"}
-      )
+    if (isItemInCart(cartItems, productId) && options.preventDuplicate) {
+      enqueueSnackbar("Item already in cart. Use the cart sidebar to update quantity or remove item.", {variant:"warning"})
+      return;
     }
 
     const cartEndpoint = `${config.endpoint}/cart`;
@@ -418,7 +416,11 @@ const Products = () => {
       );
         
       const newCartItems = await cartEndpointResponse.data;
-      setCartItems(newCartItems);
+
+      // console.log(cartEndpointResponse.data)
+      const productData = await performAPICall();
+      let cartData = generateCartItemsFrom(newCartItems, productData);
+      setCartItems(cartData);
       
     } catch (e) {
       console.log(e.response);
@@ -453,7 +455,8 @@ const Products = () => {
       />
 
        <Grid container>
-         <Grid item className="product-grid" xs={12} md={ isLoggedIn ? 9 : 12}>
+        
+         <Grid item className="product-grid" xs={12} md={ isLoggedIn ? 9 : 12 }>
            <Box className="hero">
              <p className="hero-heading">
                India’s <span className="hero-highlight">FASTEST DELIVERY</span>{" "}
