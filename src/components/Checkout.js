@@ -95,15 +95,35 @@ const AddNewAddressView = ({
         multiline
         minRows={4}
         placeholder="Enter your complete address"
+        value={newAddress.value}
+        onChange={(e) => {
+          handleNewAddress((currNewAddress) => ({
+            ...currNewAddress,
+            value: e.target.value,
+          }));
+        }}
       />
       <Stack direction="row" my="1rem">
         <Button
           variant="contained"
+          onClick={() => {
+            addAddress(
+              token, 
+             {
+              address: newAddress.value,
+             });
+          }}
         >
           Add
         </Button>
         <Button
           variant="text"
+          onClick={() => {
+            handleNewAddress((currNewAddress) => ({
+              ...currNewAddress,
+              isAddingNewAddress: false,
+            }));
+          }}
         >
           Cancel
         </Button>
@@ -262,7 +282,7 @@ const Checkout = () => {
         },
       });
 
-
+      setAddresses({ ...addresses, all: response.data });
 
     } catch (e) {
       if (e.response) {
@@ -313,8 +333,18 @@ const Checkout = () => {
    * }
    */
   const deleteAddress = async (token, addressId) => {
+    if (!token) return;
+      
     try {
-      // TODO: CRIO_TASK_MODULE_CHECKOUT - Delete selected address from the backend and display the latest list of addresses
+    
+      const response = await axios.delete(`${config.endpoint}/user/addresses/${addressId}`,
+       {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setAddresses({ ...addresses, all: response.data });
 
     } catch (e) {
       if (e.response) {
@@ -434,27 +464,31 @@ const Checkout = () => {
                </Typography>
             </Box>
 
-            {/* TODO: CRIO_TASK_MODULE_CHECKOUT - Dislay either "Add new address" button or the <AddNewAddressView> component to edit the currently selected address */}
-            <Button
-                color="primary"
-                variant="contained"
-                id="add-new-btn"
-                size="large"
-                onClick={() => {
-                  setNewAddress((currNewAddress) => ({
-                    ...currNewAddress,
-                    isAddingNewAddress: true,
-                  }));
-                }}
-              >
-                Add new address
-            </Button>
-            <AddNewAddressView
-                token={token}
-                newAddress={newAddress}
-                handleNewAddress={setNewAddress}
-                addAddress={addAddress}
-            />
+            {
+              !newAddress.isAddingNewAddress
+              ?
+              <Button
+                  color="primary"
+                  variant="contained"
+                  id="add-new-btn"
+                  size="large"
+                  onClick={() => {
+                    setNewAddress((currNewAddress) => ({
+                      ...currNewAddress,
+                      isAddingNewAddress: true,
+                    }));
+                  }}
+                >
+                  Add new address
+              </Button>
+              :
+              <AddNewAddressView
+                  token={token}
+                  newAddress={newAddress}
+                  handleNewAddress={setNewAddress}
+                  addAddress={addAddress}
+              />
+            }
 
             <Typography color="#3C3C3C" variant="h4" my="1rem">
               Payment
