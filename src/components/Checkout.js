@@ -251,8 +251,18 @@ const Checkout = () => {
    * }
    */
   const addAddress = async (token, newAddress) => {
+    if (!token) return;
+      
     try {
-      // TODO: CRIO_TASK_MODULE_CHECKOUT - Add new address to the backend and display the latest list of addresses
+      const response = await axios.post(`${config.endpoint}/user/addresses`,
+        newAddress,
+       {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+
 
     } catch (e) {
       if (e.response) {
@@ -470,9 +480,11 @@ const Checkout = () => {
             </Button>
           </Box>
         </Grid>
+
         <Grid item xs={12} md={3} bgcolor="#E9F5E1">
-          <Cart isReadOnly products={products} items={items} />
+          <Cart products={products} items={items} isReadOnly />
         </Grid>
+        
       </Grid>
       <Footer />
     </>

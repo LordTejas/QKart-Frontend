@@ -4,6 +4,7 @@ import {
   ShoppingCart,
   ShoppingCartOutlined,
 } from "@mui/icons-material";
+import { Typography } from "@mui/material";
 import { Button, IconButton, Stack } from "@mui/material";
 import { Box } from "@mui/system";
 import React from "react";
@@ -90,7 +91,10 @@ export const getTotalCartValue = (items = []) => {
  *    Total quantity of products added to the cart
  *
  */
+
 export const getTotalItems = (items = []) => {
+  if (!items) return 0;
+  return items.reduce((acc, curr) => acc + curr.qty, 0);
 };
 
 // TODO: CRIO_TASK_MODULE_CHECKOUT - Add static quantity view for Checkout page cart
@@ -114,18 +118,28 @@ const ItemQuantity = ({
   value,
   handleAdd,
   handleDelete,
+  isReadOnly
 }) => {
+
   return (
     <Stack direction="row" alignItems="center">
-      <IconButton size="small" color="primary" onClick={handleDelete}>
-        <RemoveOutlined />
-      </IconButton>
+      {
+        !isReadOnly
+        &&
+        <IconButton size="small" color="primary" onClick={handleDelete}>
+          <RemoveOutlined />
+        </IconButton>
+      }
       <Box padding="0.5rem" data-testid="item-qty">
-        {value}
+        {isReadOnly ? `Qty: ${value}`: value}
       </Box>
-      <IconButton size="small" color="primary" onClick={handleAdd}>
-        <AddOutlined />
-      </IconButton>
+      {
+        !isReadOnly
+        &&
+        <IconButton size="small" color="primary" onClick={handleAdd}>
+          <AddOutlined />
+        </IconButton>
+      }
     </Stack>
   );
 };
@@ -150,6 +164,7 @@ const Cart = ({
   products,
   items = [],
   handleQuantity,
+  isReadOnly
 }) => {
 
   const history = useHistory();
@@ -170,7 +185,7 @@ const Cart = ({
 
   // items = generateCartItemsFrom(items, products);
 
-  const CartItemView = (cartItem) => (
+  const CartItemView = (cartItem, isReadOnly) => (
   <Box display="flex" alignItems="flex-start" padding="1rem" key={cartItem.productId}>
       <Box className="image-container">
           <img
@@ -193,25 +208,35 @@ const Cart = ({
               justifyContent="space-between"
               alignItems="center"
           >
-          <ItemQuantity
-          value={cartItem.qty}
-          handleAdd={() => handleQuantity(localStorage.getItem("token"), null, null, cartItem.productId, cartItem.qty + 1)}
-          handleDelete={() => handleQuantity(localStorage.getItem("token"), null, null, cartItem.productId, cartItem.qty - 1)}
-          />
-          <Box padding="0.5rem" fontWeight="700">
-              ${cartItem.cost}
-          </Box>
+            {
+              isReadOnly 
+              ?
+                <ItemQuantity
+                value={cartItem.qty}
+                isReadOnly
+                />
+              :
+                <ItemQuantity
+                value={cartItem.qty}
+                handleAdd={() => handleQuantity(localStorage.getItem("token"), null, null, cartItem.productId, cartItem.qty + 1)}
+                handleDelete={() => handleQuantity(localStorage.getItem("token"), null, null, cartItem.productId, cartItem.qty - 1)}
+                />
+            }
+
+            <Box padding="0.5rem" fontWeight="700">
+                ${cartItem.cost}
+            </Box>
           </Box>
       </Box>
   </Box>
   );
 
-  const CartItemsViewList = (cartItems) => cartItems.map(CartItemView);
+  const CartItemsViewList = (cartItems, isReadOnly) => cartItems.map((cartItem) => CartItemView(cartItem, isReadOnly));
 
   return (
     <>
       <Box className="cart">
-        {CartItemsViewList(items)}
+        {CartItemsViewList(items, isReadOnly)}
         <Box
           padding="1rem"
           display="flex"
@@ -231,7 +256,10 @@ const Cart = ({
             ${getTotalCartValue(items)}
           </Box>
         </Box>
-
+        
+        {
+        !isReadOnly
+        &&
         <Box display="flex" justifyContent="flex-end" className="cart-footer">
           <Button
             color="primary"
@@ -243,7 +271,71 @@ const Cart = ({
             Checkout
           </Button>
         </Box>
+        }
+
       </Box>
+
+      {
+        isReadOnly
+        &&
+        <Box className="cart">
+          
+          <Box
+          padding="1rem"
+          >
+
+            <Box
+            my={2}
+            fontWeight="700"
+            fontSize="1.4rem"
+            alignSelf="flex-start">
+              Order Details
+            </Box> 
+
+            <Box
+            marginBottom="0.5rem"
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center">
+              <Typography variant="body1">Products</Typography>  
+              <Typography variant="body1">{getTotalItems(items)}</Typography>  
+            </Box>
+
+            <Box
+            marginBottom="0.5rem"
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center">
+              <Typography variant="body1">Subtotal</Typography>  
+              <Typography variant="body1">${getTotalCartValue(items)}</Typography>  
+            </Box>
+
+            <Box
+            marginBottom="0.5rem"
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center">
+              <Typography variant="body1">Shipping Charges</Typography>  
+              <Typography variant="body1">$0</Typography>  
+            </Box>
+
+            <Box
+            mb={1}
+            fontWeight="700"
+            fontSize="1.2rem"
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center">
+              <Box>Total</Box>  
+              <Box>${getTotalCartValue(items)}</Box>  
+            </Box>
+          
+
+          </Box>
+        </Box>  
+
+          
+      }
     </>
   );
 };
