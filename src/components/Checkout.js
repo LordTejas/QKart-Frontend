@@ -108,10 +108,15 @@ const AddNewAddressView = ({
           variant="contained"
           onClick={() => {
             addAddress(
-              token, 
+              token,
              {
               address: newAddress.value,
              });
+
+             handleNewAddress((currNewAddress) => ({
+              isAddingNewAddress: false,
+              value: ""
+            }));
           }}
         >
           Add
@@ -386,6 +391,24 @@ const Checkout = () => {
    *
    */
   const validateRequest = (items, addresses) => {
+
+    if (!addresses.all.length) {
+      enqueueSnackbar("Please add a new address before proceeding.", {variant: "warning"});
+      return false;
+    }
+
+    if (!addresses.selected) {
+      enqueueSnackbar("Please select one shipping address to proceed.", {variant: "warning"});
+      return false;
+    }
+
+    if (localStorage.getItem("balance") < getTotalCartValue(items)) {
+      enqueueSnackbar("You do not have enough balance in your wallet for this purchase", {variant: "warning"});
+      return false;
+    }
+
+    return true;
+
   };
 
   // TODO: CRIO_TASK_MODULE_CHECKOUT
@@ -421,6 +444,38 @@ const Checkout = () => {
    *
    */
   const performCheckout = async (token, items, addresses) => {
+
+    try {
+      const checkoutUrl = `${config.endpoint}/cart/checkout`;
+
+      if (validateRequest(items, addresses)) {
+
+        await axios.post(
+          checkoutUrl,
+          {
+            "addressId": addresses.selected,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        localStorage.setItem("balance", Number(localStorage.getItem("balance") - getTotalCartValue(items)));
+        history.push("/thanks")
+        enqueueSnackbar("Order placed successfully", {variant: "success"})
+
+      } 
+
+    } catch (e) {
+      if (e.status === 400) {
+        enqueueSnackbar(e.response.data.message, {variant: "error"});
+      } else {
+        enqueueSnackbar(e.response.data.message, {variant: "error"});
+      }
+    }
+
   };
 
   // TODO: CRIO_TASK_MODULE_CHECKOUT - Fetch addressses if logged in, otherwise show info message and redirect to Products page
@@ -442,6 +497,50 @@ const Checkout = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    const onLoadHandler = async () => {
+      await getAddresses(localStorage.getItem("token"));
+    };
+    onLoadHandler();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const AddressesList = () => {
+
+    // Single Address View
+    const AddressBarView = (address) => (
+      <Typography 
+      variant="body1" 
+      component="div" 
+      my={2}
+      key={address._id} 
+      className={`address-item ${addresses.selected === address._id ? "selected" : "not-selected"}`}
+      onClick={() => {
+        setAddresses({ ...addresses, selected: address._id });
+      }}
+      >
+        {address.address}
+        <Button
+        startIcon={<Delete />}
+        onClick={() => {
+          deleteAddress(localStorage.getItem("token"), address._id);
+        }}
+        >
+          DELETE 
+        </Button>
+      </Typography>
+    );
+
+    return addresses.all.map(AddressBarView);
+  }
+
+  const toggleAddNewAddressView = (val) => {
+    setNewAddress((currNewAddress) => ({
+      ...currNewAddress,
+      isAddingNewAddress: val,
+    }));
+  }
+
   return (
     <>
       <Header />
@@ -458,10 +557,15 @@ const Checkout = () => {
             </Typography>
             <Divider />
             <Box>
-              {/* TODO: CRIO_TASK_MODULE_CHECKOUT - Display list of addresses and corresponding "Delete" buttons, if present, of which 1 can be selected */}
-               <Typography my="1rem">
-                 No addresses found for this account. Please add one to proceed
-               </Typography>
+              {
+                addresses.all.length
+                ?
+                <AddressesList />
+                :
+                <Typography my="1rem">
+                  No addresses found for this account. Please add one to proceed
+                </Typography>
+              }
             </Box>
 
             {
@@ -473,10 +577,7 @@ const Checkout = () => {
                   id="add-new-btn"
                   size="large"
                   onClick={() => {
-                    setNewAddress((currNewAddress) => ({
-                      ...currNewAddress,
-                      isAddingNewAddress: true,
-                    }));
+                    toggleAddNewAddressView(true);
                   }}
                 >
                   Add new address
@@ -509,6 +610,9 @@ const Checkout = () => {
             <Button
               startIcon={<CreditCard />}
               variant="contained"
+              onClick={() => {
+                performCheckout(localStorage.getItem("token"), items, addresses);
+              }}
             >
               PLACE ORDER
             </Button>
