@@ -60,6 +60,7 @@ const Header = ({ children, hasHiddenAuthButtons }) => {
 
   const userDashBoard = (
     <Stack direction="row" alignItems="center" spacing={1}>
+      <AboutButton />
       <Avatar src="./avatar.png" alt={localStorage.getItem("username")} />
       <p className="username-text">{localStorage.getItem("username")}</p>
       <Button variant="text" type="button" onClick={logoutUser}>Logout</Button>

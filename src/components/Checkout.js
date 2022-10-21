@@ -611,7 +611,7 @@ const Checkout = () => {
               startIcon={<CreditCard />}
               variant="contained"
               onClick={() => {
-                performCheckout(localStorage.getItem("token"), items, addresses);
+                performCheckout(token, items, addresses);
               }}
             >
               PLACE ORDER

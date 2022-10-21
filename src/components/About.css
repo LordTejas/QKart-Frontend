@@ -1,13 +1,23 @@
 .profile-section {
     margin: 1rem;
-    padding: 2rem;
+    padding: 1rem;
 
     background-color: honeydew;
 }
 
-.profile-section h2 {
-    font-size: 4rem;
-    font-weight: 700;
+.profile-image {
+    height: 20rem;
+    width: 20rem;
+
+    background-image: url("../assets/tejas_kanji_profile_image.jpg");
+    background-size: contain;    
+    background-repeat: no-repeat;
+
+    border-width: 0.2rem;
+    border-style: solid;
+    /* border-image: linear-gradient(45deg, cyan, blue, magenta, blue, cyan) 30; */
+    border-color: cyan;
+    border-radius: 100%; 
 }
 
 .tech-stack-section {
@@ -43,4 +53,25 @@
     border-width: 0.2rem;
     border-style: solid;
     border-image: linear-gradient(45deg, blue, cyan, cyan, blue) 30;
+}
+
+.about-footer {
+    padding: 1rem;
+    /* background-image: url("../assets/carbon_black_background.jpg");
+    background-size: fill;
+    background-position: center; */
+    position: relative;
+}
+
+.footer-image {
+    height: 5rem;
+    width: 100%;
+    object-fit: cover;
+    object-position: center;
+    /* transform: scale(0.8); */
+    overflow: hidden;
+
+    position: absolute;
+    top: 0;
+    left: 0px;
 }

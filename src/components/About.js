@@ -1,7 +1,14 @@
 import Button from "@mui/material/Button";
 import Grid from '@mui/material/Grid';
 import Avatar from '@mui/material/Avatar';
-import { Box, Container } from "@mui/system";
+import LinkedInIcon from '@mui/icons-material/LinkedIn';
+import GitHubIcon from '@mui/icons-material/GitHub';
+import EmailIcon from '@mui/icons-material/Email';
+import Card from '@mui/material/Card';
+import CardActions from '@mui/material/CardActions';
+import CardActionArea from '@mui/material/CardActionArea';
+import CardContent from '@mui/material/CardContent';
+import Box from "@mui/system/Box";
 import Typography from '@mui/material/Typography';
 import React, { useEffect } from "react";
 import { useHistory } from "react-router-dom";
@@ -12,33 +19,100 @@ import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import "./About.css";
+import FooterImage from '../assets/carbon_black_background.jpg';
 
 const About = () => {
   const history = useHistory();
 
-  const routeToProducts = () => {
-    history.push("/");
-  };
-
   const ProfileSection = () => (
     <Box className="profile-section">
-      <Typography variant="h5" component="h5" align="left" style={{color: "teal"}}>
-        Developed By,
-      </Typography>
 
-      <Typography variant="h2" component="h2" align="center" style={{color: "green"}}>
-        TEJAS KANJI
-      </Typography>
+      <Card>
+        <CardActionArea>
+          <Grid container m={2} alignItems="center">
+            <Grid item xs={12} md={4} align="center">
+              <Box className="profile-image"/>
+            </Grid>
+
+            <Grid item xs={12} md={8} align="center">
+              <CardContent>
+                <Typography
+                variant="h3"
+                >
+                  Tejas Kanji
+                </Typography>
+
+                <Typography
+                variant="h6"
+                >
+                  Software Development Engineer
+                </Typography>
+
+                <Typography
+                variant="h5"
+                >
+                  Mumbai, India
+                </Typography>
+            </CardContent>
+          </Grid>
+        </Grid>
+
+        </CardActionArea>
+        <CardActions>
+          <Grid container spacing={2} align="center">
+            <Grid item xs={12} md={4}>
+              <Button
+              startIcon={<GitHubIcon style={{fontSize: '2rem'}} />}
+              style={{color: "black", fontSize: "1rem"}}
+              href="https://github.com/LordTejas"
+              target="_blank"
+              // onClick={() => history.push("https://github.com/LordTejas")}
+              >
+                GitHub
+              </Button>
+            </Grid>
+
+            <Grid item xs={12} md={4}>
+              <Button
+              startIcon={<LinkedInIcon style={{fontSize: '2rem'}} />}
+              style={{color: "black", fontSize: "1rem"}}
+              href="https://www.linkedin.com/in/tejas-kanji"
+              target="_blank"
+              // onClick={() => history.push("https://www.linkedin.com/in/tejas-kanji")}
+              >
+                LinkedIn
+              </Button>
+            </Grid>
+
+            <Grid item xs={12} md={4}>
+              <Button
+              startIcon={<EmailIcon style={{fontSize: '2rem'}} />}
+              style={{color: "black", fontSize: "1rem"}}
+              href="mailto:tejas5225@gmail.com"
+              // onClick={() => history.push("https://mailto:tejas5225@gmail.com")}
+              >
+                Email
+              </Button>
+            </Grid>
+          </Grid>
+
+        </CardActions>
+      </Card>
 
     </Box>
   );
 
   const SkillAvatar = ({skill}) => (
-    <Avatar 
-    alt={skill.skill} 
-    src={skill.url} 
-    variant="square"
-    style={{height: "8rem", width: "8rem"}}/>
+    <Box>
+      <Avatar 
+      alt={skill.skill} 
+      src={skill.url} 
+      variant="square"
+      style={{height: "8rem", width: "8rem"}}
+      />
+      <Typography variant="h4" component="div">{skill.skill}</Typography>
+
+    </Box>
   )
 
   const skills = [
@@ -69,13 +143,12 @@ const About = () => {
 
     {
       skill: "REST API",
-      url: "https://cdn-icons-png.flaticon.com/512/7069/7069751.png"
+      url: "https://cdn-icons-png.flaticon.com/512/718/718064.png"
     },
 
     {
-      skill: "Chrome Dev Tools",
+      skill: "Developer Tools",
       url: "https://cdn-icons-png.flaticon.com/512/6125/6125000.png"
-      
     },
 
     {
@@ -126,15 +199,25 @@ const About = () => {
   );
 
   const AboutFooter = () => (
-    <Box className="about-footer">
-      
+    <Box className="about-footer" align="center">
+
+        <img src={FooterImage} alt="" className="footer-image" />
+
+        <Button
+        variant="contained"
+        size="large"
+        align="center"
+        onClick={() => history.push("/")}
+        >
+          Continue Exploring
+        </Button>
     </Box>
   );
 
   return (
     <>
       <Header />
-      <Box className="">
+      <Box>
 
         <ProfileSection />
 
