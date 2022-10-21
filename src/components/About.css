@@ -1,0 +1,46 @@
+.profile-section {
+    margin: 1rem;
+    padding: 2rem;
+
+    background-color: honeydew;
+}
+
+.profile-section h2 {
+    font-size: 4rem;
+    font-weight: 700;
+}
+
+.tech-stack-section {
+    margin: 1rem;
+    padding: 1rem;
+
+    background-color: honeydew;
+}
+
+.about-footer {
+    margin: 1rem;
+    padding: 1rem;
+
+    background-color: honeydew;
+}
+
+.tech-stack-heading {
+    padding: 1rem;
+    color: forestgreen;
+    font-size: 2.5rem;
+    font-weight: 500;
+
+    border-bottom: 2px solid green;
+}
+
+.red-yellow-border {
+    border-width: 0.4rem;
+    border-style: solid;
+    border-image: linear-gradient(45deg, yellow, red , yellow) 30;
+}
+
+.cyan-blue-border {
+    border-width: 0.2rem;
+    border-style: solid;
+    border-image: linear-gradient(45deg, blue, cyan, cyan, blue) 30;
+}
