@@ -2,6 +2,10 @@
     "name": "react-me-backend",
     "version": "0.1.0",
     "private": true,
+    "engines": {
+        "node": "16.x",
+        "npm": "7.x"
+    },
     "scripts": {
         "start": "node index.js"
     },

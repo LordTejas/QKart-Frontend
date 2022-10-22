@@ -8,7 +8,7 @@ import Thanks from "./components/Thanks";
 import About from "./components/About";
 
 export const config = {
-  endpoint: `http://${ipConfig.workspaceIp}:8082/api/v1`,
+  endpoint: `http://https://lord-tejas-qkart-frontend.herokuapp.com/api/v1/`,
 };
 
 

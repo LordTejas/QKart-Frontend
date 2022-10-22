@@ -2,6 +2,10 @@
   "name": "qkart-frontend-v2-hooks",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "16.x",
+    "npm": "7.x"
+  },
   "dependencies": {
     "@babel/core": "^7.17.10",
     "@emotion/react": "^11.6.0",
